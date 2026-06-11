@@ -1,4 +1,4 @@
-package com.catgal.netty.c2;
+package com.catgal.nio.c2;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,12 @@ public class MultiThreadServer {
         SelectionKey bossKey = ssc.register(selector, 0, null);
         bossKey.interestOps(SelectionKey.OP_ACCEPT);
         ssc.bind(new InetSocketAddress(8082));
-        Worker worker = new Worker("危宇杰");
+        Worker[] workers = new Worker[10];
+        for (int i = 0; i < workers.length; i++) {
+            Worker worker = new Worker("worker"+(i+1));
+            workers[i] = worker;
+        }
+        int index = 0;
         while (true) {
             selector.select();
             Set<SelectionKey> keys = selector.selectedKeys();
@@ -34,7 +39,7 @@ public class MultiThreadServer {
                     sc.configureBlocking(false);
                     //关联
                     System.out.println("before register...");
-                    worker.register(sc);
+                    workers[(index++)%workers.length].register(sc);
                     System.out.println("after register...");
                 }
             }
@@ -63,9 +68,10 @@ public class MultiThreadServer {
                 synchronized (this) {
                     if (!isRunning) {
                         thread = new Thread(this);
+                        selector = Selector.open();
                         thread.setName(workerName);
                         thread.start();
-                        selector = Selector.open();
+                        isRunning = true;
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package com.catgal.netty.c2;
+package com.catgal.nio.c1.c2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
